@@ -3,7 +3,7 @@ import subprocess
 import argparse
 import pathlib
 import shutil
-
+from poetry.semver import parse_constraint
 
 PYTHON_VERSIONS = ["2.7"] + ["3." + str(i) for i in range(4, 9)]
 
@@ -41,6 +41,16 @@ def command_line():
     )
 
     return parser.parse_args()
+
+
+def check_version():
+    """
+     from poetry.poetry import Poetry 
+     p = Poetry.create(os.getcwd()) 
+     pc = p.package.python_constraint
+     pg = parse_constraint('python_version')
+     pc.allows(pg)
+     """
 
 
 def run():
