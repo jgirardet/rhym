@@ -1,9 +1,17 @@
-import sys
-import subprocess
 import argparse
+import os
 import pathlib
 import shutil
+import subprocess
+import sys
+
+from poetry.poetry import Poetry
 from poetry.semver import parse_constraint
+from poetry.exceptions import PoetryException
+
+class RhymException(PoetryException):
+    pass
+
 
 PYTHON_VERSIONS = ["2.7"] + ["3." + str(i) for i in range(4, 9)]
 
@@ -43,19 +51,21 @@ def command_line():
     return parser.parse_args()
 
 
-def check_version():
-    """
-     from poetry.poetry import Poetry 
-     p = Poetry.create(os.getcwd()) 
-     pc = p.package.python_constraint
-     pg = parse_constraint('python_version')
-     pc.allows(pg)
-     """
+def check_version(poet, python_version):
+
+    pc = poet.package.python_constraint
+    pg = parse_constraint(python_version)
+
+    if pc.allows(pg):
+        return True
+    else:
+        raise RhymException('The specified python version {} doesn\'t feet with pytproject.toml constraint : {}'.format(python_version, pc))
 
 
 def run():
 
     args = command_line()
+    poet = Poetry.create(os.getcwd())
 
     if args.remove:
         venv_dir = pathlib.Path(".venv")
@@ -64,7 +74,10 @@ def run():
         print(".venv folder removed")
         return
 
-    if args.python:
+
+
+
+    if args.python and check_version(poet, args.python):
         create_venv(args.python)
         sys.argv = clear_command_line()
 
